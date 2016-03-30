@@ -1,0 +1,216 @@
+<!-- extend base layout -->
+{% extends "__base.html" %}
+
+{% block content %}
+	{% include '_block_flash.html' %}
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-9">
+				<h3>Sweep Data</h3>
+				<div id="main_plot" class="plot_cls" style=' height: 600px; ' >
+					<div style='padding-top: 200px'>
+						<center>
+						<h2>This demo requires javascript!</h2>
+						<h2>Please enable javascript in your browser</h2>
+						</center>
+					</div>
+				</div>
+				<div id="fft_plot"  class="plot_cls" style=' display: none; ' ></div>
+				<div id="no_plot"   class="plot_cls" style=' display: none;'>
+					<div style='width: 65%; margin: 0 auto; position: relative; top: 50%; transform: translateY(-50%);'>
+						<h3>No paths enabled! Please select a path to plot.</h3>
+					</div>
+				</div>
+				<hr>
+				<h3>Live View</h3>
+				<div style='border:4px !important; border-color: black !important; margin:4px;'>
+					<center>
+						<img id="main_cam" class="main_cam_cls" style='max-width: 640px; max-height: 480px; width: 100%' />
+					</center>
+					<!-- Look ma! I re-invented MJPEG, only probably buggier! -->
+				</div>
+			</div>
+			<div class="col-md-3">
+				<form class="form-inline">
+					<div style='height:5px;'></div>
+					<!-- Still no substitute for the center tag. -->
+					<center>
+						<a href="http://www.akelavna.com/" target="_top">
+							<img src="/static/img/top_akelavnalogo5.jpg" style="height: 45px;">
+						</a>
+					</center>
+					<div style='height:5px;'></div>
+					<div class='well'>
+						Display Parameters:
+						<table style="width:100%">
+							<colgroup>
+								<col style="width:50%"/>
+								<col style="width:50%"/>
+							</colgroup>
+							<tr>
+								<td>
+									<input type="checkbox" id="sparam-s11" name="sparam" value="S11" checked='true'> S11
+								</td>
+								<td>
+									<input type="checkbox" id="sparam-s12" name="sparam" value="S12" checked='true'> S12
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<input type="checkbox" id="sparam-s21" name="sparam" value="S21" checked='true'> S21
+								</td>
+								<td>
+									<input type="checkbox" id="sparam-s22" name="sparam" value="S22" checked='true'> S22
+								</td>
+							</tr>
+							<tr>
+								<td colspan=2>
+									<hr>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<input type="checkbox" id="sparam-s11-fft" name="sparam" value="S11-FFT" checked='true'> S11 FFT
+								</td>
+								<td>
+									<input type="checkbox" id="sparam-s12-fft" name="sparam" value="S12-FFT"> S12 FFT
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<input type="checkbox" id="sparam-s21-fft" name="sparam" value="S21-FFT"> S21 FFT
+								</td>
+								<td>
+									<input type="checkbox" id="sparam-s22-fft" name="sparam" value="S22-FFT"> S22 FFT
+								</td>
+							</tr>
+						</table>
+
+					</div>
+					<hr><br>
+					<div id="authenticate_well" class='well'>
+						<center>
+							<div>Control Status: <span id="auth_text">View Only</span><br></div>
+							<div id='authenticate_button_container'>
+								<button id="authenticate_button" type="button" class="btn btn-danger"  style='margin-top: 5px'>Unlock Controls</button>
+							</div>
+						</center>
+					</div>
+					<div class='well'>
+						<div style='padding-bottom: 5px'>Sweep Points:<br><sup>(Min 2, Max 2048)</sup></div>
+						<input id="sweep-points" class="form-control unlockable" type="number" value="{{acq_params['npts']}}" min="2" max="2048" disabled />
+					</div>
+					<div class='well'>
+						<table class="center-table padded-table">
+							<colgroup>
+								<col style="width:80px"/>
+								<col style="width:119px"/>
+							</colgroup>
+							<tr>
+								<td colspan="2">
+									<div style='padding-bottom: 5px'>Sweep Range (MHz):<br> <sup>(375 MHz Min, 6000 MHz Max)</sup></div>
+								</td>
+							</tr>
+							<tr>
+
+								<td>
+									Start Freq:
+								</td>
+								<td>
+									<input id="start-f" class="form-control unlockable" type="number" value="{{acq_params['startf']}}" min="375" max="6050" disabled />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									Stop Freq:
+								</td>
+								<td>
+									<input id="stop-f" class="form-control unlockable" type="number" value="{{acq_params['stopf']}}" min="375" max="6000" disabled />
+								</td>
+							</tr>
+						</table>
+
+					</div>
+
+					<div class='well'>
+						<h5>Active Experiment:</h5>
+						<label><input class='path-select unlockable' type="radio" disabled name="experiment-select" id="experiment-1" value="experiment-1" {{ "checked" if acq_params['path']['experiment-1'] else ""}}> High-Pass Filter</label><div class="pull-right"><a target="_blank" href='/docs#High_Pass'>About</a></div><br>
+						<label><input class='path-select unlockable' type="radio" disabled name="experiment-select" id="experiment-2" value="experiment-2" {{ "checked" if acq_params['path']['experiment-2'] else ""}}> Band-Pass/Diplexer</label><div class="pull-right"><a target="_blank" href='/docs#Band_Pass'>About</a></div><br>
+						<label><input class='path-select unlockable' type="radio" disabled name="experiment-select" id="experiment-3" value="experiment-3" {{ "checked" if acq_params['path']['experiment-3'] else ""}}> Coupled Antennas</label><div class="pull-right"><a target="_blank" href='/docs#Coupled_Antennas'>About</a></div><br>
+						<label><input type="radio"                   type="radio" disabled name="experiment-select" id="experiment-4" value="experiment-4" {{ "checked" if acq_params['path']['experiment-4'] else ""}} > Your Experiment?</label><div class="pull-right"><a target="_blank" href='/your_experiment'>About</a></div>
+
+						<span id="experiment-timer"></span><br>
+						<sub><a href="#"  id="take_control_text">Take control to manually set active experiment.</a></sub>
+
+					</div>
+
+					<div class='well'>
+						<div style='padding-bottom: 5px'>Sweep Speed:</div>
+						<input type="radio" disabled name="sweep_speed" checked> 45 KPts/s<br>
+						<input type="radio" disabled name="sweep_speed"> 30 KPts/s<br>
+						<input type="radio" disabled name="sweep_speed"> 15.3 KPts/s<br>
+						<input type="radio" disabled name="sweep_speed"> 7 KPts/s<br>
+						<input type="radio" disabled name="sweep_speed"> 3.5 KPts/s<br>
+						<input type="radio" disabled name="sweep_speed"> 2 KPts/s<br>
+						<sub>This demo does not support changing sample speed. However, the VNA itself supports speeds from 45 KPts/s to 20 Pts/s.</sub>
+					</div>
+
+				</form>
+			</div>
+
+		</div>
+	</div>
+
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-12">
+				<p>This demonstration is <a href="https://github.com/AkelaInc/OpenVNA-Web-Demo" target="_top">Open-Source</a>.
+				VNA API documentation is available <a href="http://akelainc.github.io/html/index.html" target="_top">here</a>.</p>
+				<p> <!-- Just say no to spambots -->
+					For technical inquiries, please contact <span style="unicode-bidi:bidi-override; direction: rtl;">moc.cnialeka@flowc</span>.
+					For sales inquiries, please contact <span style="unicode-bidi:bidi-override; direction: rtl;">moc.cnialeka@hserehcm</span>.
+				</p>
+			</div>
+		</div>
+	</div>
+
+	<div class="clearfix">
+	<div id="box">
+		<div class="clearfix">
+		<p><b>Applying Changes</b><span id='remaining_changes'>0 remaining</span></p>
+	</div>
+
+{% endblock %}
+
+
+{% block navbar_extra %}
+
+	<!-- Collect the nav links, forms, and other content for toggling -->
+	<div>
+		<ul class="nav navbar-nav pull-right">
+			<li>
+				<p class="nav navbar-text">
+					Viewers: <span id="active-viewers">{{active_users[0]}}</span>, Active Controllers: <span id="active-controllers">{{active_users[1]}}</span>
+				</p>
+			</li>
+		</ul>
+	</div>
+
+{% endblock %}
+
+
+{% block footer %}
+
+	{% assets "js_plots" %}
+		<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+	{% endassets %}
+
+	<style>
+
+	</style>
+
+	<script>
+
+	</script>
+{% endblock %}
+

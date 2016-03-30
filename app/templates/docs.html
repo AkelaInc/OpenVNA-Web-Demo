@@ -1,0 +1,42 @@
+<!-- extend base layout -->
+{% extends "__base.html" %}
+
+{% block content %}
+
+	<div class="col-md-1">
+	</div>
+
+	<div class="col-md-10">
+		<div class="well">
+			<h1>Documentation</h1>
+			<div>
+				<a name="High_Pass"></a><h3>High-Pass Filter</h3>
+				<p>
+					This is a commercially available Mini-Circuits high-pass filter, a
+					<a href='http://www.minicircuits.com/MCLStore/ModelSearch?search_type=info&model=SHP-1000%2B'>SHP-1000</a>.
+				</p>
+			</div>
+			<div>
+				<a name="Band_Pass"></a><h3>Band-Pass Filter/Diplexer</h3>
+				<p>
+					This is two ports on a custom CDMA cellular phone diplexer, with the third port terminated. VNA Port 1 is connected
+					to the high-frequency diplexer port, and VNA port 2 is connected to the composite diplexer port.
+				</p>
+			</div>
+			<div>
+				<a name="Coupled_Antennas"></a><h3>Coupled Antennas</h3>
+				<p>
+					This is two cavity-backed planar log-periodic antennas designed and manufactured by Akela that are closely coupled to each other.
+					A rotating metallic vane is periodically inserted between the two coupled antennas.
+				</p>
+			</div>
+
+			<div>
+				<a href="/">Back to VNA-View</a>
+			</div>
+		</div>
+	</div>
+	<div class="col-md-1">
+
+	</div>
+{% endblock %}
