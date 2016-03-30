@@ -1,6 +1,7 @@
 import os
 import datetime
 from flask import Flask
+from flask.ext.sqlalchemy import SQLAlchemy
 from flask_debugtoolbar import DebugToolbarExtension
 from config import basedir
 from babel.dates import format_datetime
@@ -28,6 +29,7 @@ if "debug" in sys.argv:
 # app.config['ASSETS_DEBUG'] = True
 assets = Environment(app)
 
+db = SQLAlchemy(app)
 
 js_plots = Bundle(
 				'js/socket.io.js',

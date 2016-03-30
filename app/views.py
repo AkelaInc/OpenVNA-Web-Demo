@@ -10,13 +10,35 @@ from flask_socketio import emit
 import os.path
 import logging
 
+import json
 # from guess_language import guess_language
 from app import app
+from app import db
 from app import socketio
-import json
+from .models import HttpRequestLog
 
 
 log = logging.getLogger("Main.Web")
+
+
+
+def log_request(request, operation=""):
+	req = HttpRequestLog(
+		path           = request.path,
+		user_agent     = request.headers.get('User-Agent'),
+		referer        = request.headers.get('Referer'),
+		forwarded_for  = request.headers.get('X-Originating-IP'),
+		originating_ip = request.headers.get('X-Forwarded-For'),
+		operation      = operation,
+		)
+	db.session.add(req)
+	db.session.commit()
+
+
+@app.before_request
+def before_request():
+	log_request(request, "http GET")
+
 
 
 def error_response(err_str):
@@ -182,6 +204,8 @@ def authenticate_message(msg):
 @socketio.on('connect', namespace='/vna_interface')
 def event_connect():
 	log.info("event_connect() -> %s", request.sid)
+	log_request(request, "websocket connect")
+
 	active = app.config['LOGIN_ARBITER'].add_non_auth(request.sid)
 	if active[0]:
 		emit('active', list(active), broadcast=True, namespace='/vna_interface')
@@ -189,6 +213,7 @@ def event_connect():
 @socketio.on('disconnect', namespace='/vna_interface')
 def event_disconnect():
 	log.info("event_disconnect() -> %s", request.sid)
+	log_request(request, "websocket disconnect")
 	active = app.config['LOGIN_ARBITER'].remove_item(request.sid)
 	if active[0] or active[1]:
 		emit('active', list(active), broadcast=True, namespace='/vna_interface', include_self=False)

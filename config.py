@@ -15,6 +15,12 @@ class BaseConfig(object):
 	ASSETS_DEST = 'app/static'
 
 
+	SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'requestlog.db')
+
+	print(("DB: ", SQLALCHEMY_DATABASE_URI))
+	SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
+
+
 # VNA Defaults:
 
 VNA_IP         = "192.168.1.217"
